@@ -1,0 +1,8 @@
+SELECT T0.DocNum,T0.NumAtCard,T1.ItemCode,T1.Dscription,T1.Quantity
+,T1.Quantity - ISNULL((SELECT SUM(PlannedQty) FROM OWOR A WHERE A.U_SALODR = T0.DocNum AND A.ItemCode = T1.ItemCode ),0) [Balance Quantity]
+  FROM ORDR T0 INNER JOIN RDR1 T1 ON T0.DocEntry = T1.DocEntry 
+WHERE T1.ItemCode = $[OWOR.ItemCode]
+
+UNION ALL
+
+SELECT '' DocNum,'' NumAtCard,'' ItemCode,'' Dscription,0 Quantity,0 [Balance Quantity]
