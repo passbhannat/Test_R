@@ -1,0 +1,18 @@
+ALTER PROC [dbo].[DISP_GET_SO]
+@CardCode Varchar(100)
+,@Port Varchar(50)
+,@Branch Varchar(50)
+
+AS
+
+SELECT distinct DocEntry FROM (
+SELECT  T1.DocEntry,T0.QUANTITY- 
+ISNULL((SELECT SUM(U_Quantity) FROM [@DISP_PLAN1] A INNER JOIN [@DISP_PLAN] B ON A.DocEntry=B.DocEntry
+ WHERE A.U_BaseKey = T0.DocEntry 
+AND A.U_BaseLine=T0.LineNum AND B.U_Approved='Y' AND B.Canceled='N'),0) OpenQty
+FROM RDR1 T0 
+INNER JOIN ORDR T1 ON T0.DOCENTRY= T1.DOCENTRY 
+INNER JOIN OITM T2 ON T0.ITEMCODE = T2.ITEMCODE 
+WHERE T1.CardCode=@CardCode AND  T1.U_PRTOFDSHG=@Port AND T1.DocStatus='O' 
+AND (T1.BPLId = @Branch OR @Branch='') 
+) AS A WHERE A.OpenQty>0 
